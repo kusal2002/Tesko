@@ -1,0 +1,17 @@
+# Netlify configuration for the frontend.
+# In the Netlify UI, set the site's "Base directory" to `frontend` so these
+# paths (and package.json) resolve correctly.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Single Page App fallback: serve index.html for any route so client-side
+# navigation and deep links work.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
