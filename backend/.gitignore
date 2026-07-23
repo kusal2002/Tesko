@@ -1,5 +1,15 @@
 node_modules
-# Keep environment variables out of version control
 .env
-
+dist/
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+!prisma/seed.ts
 /generated/prisma
+
+# AI assistant tooling (not part of the application)
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
