@@ -6,7 +6,7 @@ import taskRoutes from "./src/routes/task.routes.js";
 
 const app = express();
 
-app.use(cors({ origin: env.corsOrigin }));
+app.use(cors({ origin: env.corsOrigins }));
 app.use(express.json());
 
 app.get("/api/health", (_req, res) => {

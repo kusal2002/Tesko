@@ -1,0 +1,26 @@
+# Render Blueprint for the Express backend.
+# Create the service from the Render dashboard: New + > Blueprint, then point it
+# at this repo. Render will prompt for the secret env vars marked `sync: false`.
+services:
+  - type: web
+    name: tesko-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    # Install deps, generate the Prisma client, and apply migrations to Neon.
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      # Set these in the Render dashboard (Blueprint will prompt for them):
+      - key: DATABASE_URL # Neon connection string (use the DIRECT/unpooled one)
+        sync: false
+      - key: JWT_SECRET # long random string
+        sync: false
+      - key: CORS_ORIGIN # your Netlify site URL, e.g. https://tesko.netlify.app
+        sync: false

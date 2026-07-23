@@ -234,6 +234,82 @@ curl -X POST http://localhost:5000/api/tasks \
 
 ---
 
+## 🚀 Deployment
+
+This project deploys as three pieces:
+
+| Piece | Host | Notes |
+| :--- | :--- | :--- |
+| Database | **Neon** | Serverless PostgreSQL |
+| Backend (Express) | **Render** | Always-on Node web service |
+| Frontend (React) | **Netlify** | Static site |
+
+### 1. Database — Neon
+
+1. Create a project at [neon.tech](https://neon.tech) and a database (e.g. `tesko_db`).
+2. Copy the **direct (unpooled)** connection string — it already ends with
+   `?sslmode=require`. You'll use it as `DATABASE_URL`.
+
+### 2. Backend — Render
+
+Option A (Blueprint): the repo includes [`render.yaml`](render.yaml). In Render,
+choose **New + → Blueprint** and select this repo; it creates the service and
+prompts for the secret env vars.
+
+Option B (manual): **New + → Web Service**, then set:
+
+- **Root Directory**: `backend`
+- **Build Command**: `npm install && npx prisma generate && npx prisma migrate deploy`
+- **Start Command**: `npm start`
+- **Health Check Path**: `/api/health`
+
+Environment variables (both options):
+
+| Variable | Value |
+| :--- | :--- |
+| `DATABASE_URL` | Neon connection string |
+| `JWT_SECRET` | a long random string |
+| `NODE_ENV` | `production` |
+| `CORS_ORIGIN` | your Netlify URL (set after step 3) |
+
+After the first deploy, seed the default user + sample tasks once (Render
+**Shell** tab, or locally with `DATABASE_URL` pointed at Neon):
+
+```bash
+npm run db:seed
+```
+
+Your backend URL will look like `https://tesko-backend.onrender.com`.
+(The Render free tier sleeps when idle, so the first request after inactivity
+can take ~30–60s.)
+
+### 3. Frontend — Netlify
+
+**Add new site → Import from Git**, then set:
+
+- **Base directory**: `frontend`
+- **Build command**: `npm run build`
+- **Publish directory**: `frontend/dist`
+
+(These are also in [`frontend/netlify.toml`](frontend/netlify.toml).)
+
+Environment variable:
+
+| Variable | Value |
+| :--- | :--- |
+| `VITE_API_BASE_URL` | `https://<your-render-app>.onrender.com/api` |
+
+> Vite inlines this at build time, so set it **before** the build (redeploy if
+> you change it).
+
+### 4. Connect them
+
+Set `CORS_ORIGIN` on Render to your Netlify site URL (e.g.
+`https://tesko.netlify.app`) and redeploy the backend. Then open the Netlify URL
+and log in with the default credentials.
+
+---
+
 ## 📤 Submission Checklist
 
 - [x] Frontend + Backend + PostgreSQL database
@@ -244,3 +320,4 @@ curl -X POST http://localhost:5000/api/tasks \
 - [x] REST API matching the required endpoints
 - [x] SQL dump / migration files (`database/`, `backend/prisma/migrations/`)
 - [x] `README.md` and `.env.example` (backend & frontend)
+- [x] Deployment config (Netlify + Render + Neon)
